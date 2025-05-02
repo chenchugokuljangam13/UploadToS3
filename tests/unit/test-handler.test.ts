@@ -64,21 +64,21 @@ describe('lambdaHandler', () => {
     process.env.BUCKET_NAME = 'test-bucket';
   });
 
-  test('should return 400 if fileName is missing', async () => {
+  test('return 400 if fileName is missing', async () => {
     event.queryStringParameters = { fileType: 'video/mp4' };
     const result = await lambdaHandler(event);
     expect(result.statusCode).toBe(400);
     expect(JSON.parse(result.body).message).toBe('Missing fileName');
   });
 
-  test('should return 400 if fileType is missing', async () => {
+  test('return 400 if fileType is missing', async () => {
     event.queryStringParameters = { fileName: 'test.mp4' };
     const result = await lambdaHandler(event);
     expect(result.statusCode).toBe(400);
     expect(JSON.parse(result.body).message).toBe('Missing fileType');
   });
 
-  test('should return 200 and a presigned URL', async () => {
+  test('return 200 and a presigned URL', async () => {
     event.queryStringParameters = {
       fileName: 'test.mp4',
       fileType: 'video/mp4'
@@ -88,7 +88,7 @@ describe('lambdaHandler', () => {
     expect(JSON.parse(result.body).uploadUrl).toBe('https://presigned-url.com');
   });
 
-  test('should return 500 if an error occurs while generating signed URL', async () => {
+  test('return 500 if an error occurs while generating signed URL', async () => {
     (getSignedUrl as jest.Mock).mockRejectedValueOnce(new Error('Simulated failure'));
     event.queryStringParameters = {
       fileName: 'test.mp4',
