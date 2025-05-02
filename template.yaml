@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  FileUploadS3JCG
+  Sample SAM Template for FileUploadS3JCG
+
+Globals:
+  Function:
+    Timeout: 10
+    LoggingConfig:
+      LogFormat: JSON
+
+Resources:
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: large-file-upload-jcg
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods:
+              - GET
+              - PUT
+              - POST
+            AllowedOrigins:
+              - '*'
+  UploadToS3:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: ./
+      Handler: app.lambdaHandler
+      Runtime: nodejs22.x
+      Architectures:
+      - x86_64
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref MyS3Bucket
+      Events:
+        UploadAssetAPI:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /upload
+            Method: post
+      Policies: 
+        - S3CrudPolicy:
+            BucketName: !Ref MyS3Bucket
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+        - file-upload/app.ts
+        External:
+          - '@aws-sdk/client-s3'
+          - '@aws-sdk/s3-request-presigner'
+
